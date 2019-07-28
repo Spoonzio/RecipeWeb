@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Homepage
+{% endblock %}
+
+{% block main %}
+<table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Share Amount</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Sub-Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in portfolio %}
+                <tr>
+                {% for key, value in stock.items() %}
+                    <td>{{value}}</td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+
+        <tfoot>            
+            <tr>
+                <td align="right" colspan="4">CASH:</td>
+                <td>{{cash}}</td>
+            </tr>
+            <tr>
+                <td align="right" colspan="4">TOTAL:</td>
+                <td>{{total}}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+{% endblock %}
