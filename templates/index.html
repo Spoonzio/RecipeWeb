@@ -5,36 +5,49 @@
 {% endblock %}
 
 {% block main %}
-<table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Symbol</th>
-                <th>Share Amount</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Sub-Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stock in portfolio %}
-                <tr>
-                {% for key, value in stock.items() %}
-                    <td>{{value}}</td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
+    <div id="demo" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <ul class="carousel-indicators">
+            <li data-target="#demo" data-slide-to="0" class="active"></li>
+            <li data-target="#demo" data-slide-to="1"></li>
+            <li data-target="#demo" data-slide-to="2"></li>
+        </ul>
 
-        <tfoot>            
-            <tr>
-                <td align="right" colspan="4">CASH:</td>
-                <td>{{cash}}</td>
-            </tr>
-            <tr>
-                <td align="right" colspan="4">TOTAL:</td>
-                <td>{{total}}</td>
-            </tr>
-        </tfoot>
-    </table>
+        <!-- The slideshow -->
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="la.jpg" alt="Los Angeles">
+            </div>
+
+            <div class="carousel-item">
+                <img src="chicago.jpg" alt="Chicago">
+            </div>
+
+            <div class="carousel-item">
+                <img src="ny.jpg" alt="New York">
+            </div>
+        </div>
+
+        <!-- Left and right controls -->
+        <a class="carousel-control-prev" href="#demo" data-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </a>
+            <a class="carousel-control-next" href="#demo" data-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </a>
+    </div>
+
+    <!-- horizontal groups with filtered tags -->
+    {% for i in list %}
+        <div>
+            <h1 class="display-4">{{ list[i] }}</h1>
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item">random item in db with selected tag var</li>
+                <li class="list-group-item">Second item</li>
+                <li class="list-group-item">Third item</li>
+                <li class="list-group-item" href = "/search">See More ...</li>
+            </ul>
+        </div>
+    {% endfor %}
 
 {% endblock %}
