@@ -2,10 +2,10 @@ from flask import Flask, flash, jsonify, redirect, render_template, request, ses
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-
+import json
 
 from cs50 import SQL
-from helpers import login_required
+from helper import login_required
 
 #  Configure application
 app = Flask(__name__)
@@ -19,43 +19,57 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db = SQL("sqlite:///recipes.db")
+db = SQL("sqlite:///recipe.db")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.methods == "POST":
-        term = request.fom.get("search")
+    if request.method == "POST":
         #look up serch term in recipe DB
-        result = lookup(term)
-
+        result = lookup()
         return render_template("search.html" , results=results)
 
     else:
-        if session["user_id"] == None:
-            #lookup db info
-            return render_template("index.html", info=None)
+        result = []
+        search = ["Breakfast", "Vegetarian", "Pasta"]
+        for i in search:
+            temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term LIMIT 3", term=i)
+            for i in range(len(temp)):
+                result.append(temp[i])
 
-        else:
-            info = db.execute("SELECT name FROM user WHERE id = :iden" :iden = session["user_id"] )
-            return render_template("index.html", info=info)
+        return render_template("index.html", result = result)
 
 @app.route("/search", methods=["POST", "GET"])
 def search():
-    if request.methods == "POST":
-        term = request.fom.get("search")
+    if request.method == "POST":
         #look up serch term in recipe DB
-        result = lookup(term)
+        result = lookup()
+        return render_template("search.html" , results=results)
+    else:
+        term = request.args.get("q")
+        if not term:
+            return redirect("/")
+
+        try:
+            fcategory = db.execute("SELECT DISTINCT Category FROM recipes")
+            dcategory = db.execute("SELECT DISTINCT Alcoholic FROM drinks")
+            if term in fcategory:
+                result = db.execute("SELECT * FROM recipes WHERE Category = :search ", search=str(term))
+            elif term in dcategory:
+                result = db.execute("SELECT * FROM drinks WHERE Alcoholic = :search ", search=str(term))
+            elif term == "meal":
+                result = db.execute("SELECT * FROM recipes WHERE NOT Category = 'Dessert' AND NOT Categoy = 'Side' AND NOT Category = 'Starter'")
+            else:
+                result = db.execute("SELECT * FROM recipes WHERE Meal LIKE '%:search%'", search=str(term))
+        except(KeyError, TypeError, ValueError):
+            result = None
 
         return render_template("search.html" , results=results)
-
-    else:
-        return redirect("/")
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
     session.clear()
 
-    if request.methods == "POST":
+    if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
 
@@ -65,7 +79,7 @@ def login():
             emessage = "missing password"
             return render_template("login.html", emessage=emessage)
 
-        info = db.execute("SELECT * FROM user WHERE email = :email", :email=email)
+        info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
         if len(info) != 1 or not check_password_hash(info[0]["hash"], password):
             emessage = "invalid email or password"
             return render_template("login.html", emessage=emessage)
@@ -102,7 +116,7 @@ def register():
             return render_template("register.html",emessage=emessage)
 
         # Query database for username
-        info = db.execute("SELECT * FROM user WHERE email = :email", :email=email)
+        info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
 
         if len(info) != 0:
             return apology("user exists already")
@@ -130,7 +144,7 @@ def register():
 
 @app.route("/logout")
 def logout():
-    # Log user out"""
+    # Log user out
     # Forget any user_id
     session.clear()
 
@@ -142,11 +156,15 @@ def logout():
 def page_not_found(e):
     return render_template("404.html")
 
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template("500.html")
 
-def lookup(fsearch):
+def lookup():
     # lookup db with term
+    fterm = request.form.get("search")
     try:
-        result = db.execute("SELECT * FROM recipe WHERE name LIKE '%:search%'", :search=str(fsearch))
+        result = db.execute("SELECT * FROM recipes WHERE name LIKE '%:search%'", search=str(fterm))
         return (result)
     except(KeyError, TypeError, ValueError):
         return (None)
