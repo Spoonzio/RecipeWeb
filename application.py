@@ -3,6 +3,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import json
+import random
 
 from cs50 import SQL
 from helper import login_required
@@ -30,11 +31,17 @@ def index():
 
     else:
         result = []
-        search = ["Breakfast", "Vegetarian", "Pasta"]
-        for i in search:
+        display = []
+        fcategory = db.execute("SELECT DISTINCT Category FROM recipes")
+        fcategory = [cat["Category"] for cat in fcategory]
+        random.shuffle(fcategory)
+        for x in range(3):
+            display.append(str(fcategory[x]))
+
+        for i in display:
             temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term LIMIT 3", term=i)
-            for i in range(len(temp)):
-                result.append(temp[i])
+            for j in range(len(temp)):
+                result.append(temp[j])
 
         return render_template("index.html", result = result)
 
