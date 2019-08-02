@@ -39,7 +39,7 @@ def index():
             display.append(str(fcategory[x]))
 
         for i in display:
-            temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term LIMIT 3", term=i)
+            temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
             for j in range(len(temp)):
                 result.append(temp[j])
 
@@ -52,25 +52,25 @@ def search():
         result = lookup()
         return render_template("search.html" , results=results)
     else:
-        term = request.args.get("q")
+        term = str(request.args.get("q")).capitalize()
         if not term:
             return redirect("/")
 
         try:
-            fcategory = db.execute("SELECT DISTINCT Category FROM recipes")
-            dcategory = db.execute("SELECT DISTINCT Alcoholic FROM drinks")
+            fcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
+            dcategory = [elem['Alcoholic'] for elem in db.execute("SELECT DISTINCT Alcoholic FROM drinks")]
             if term in fcategory:
-                result = db.execute("SELECT * FROM recipes WHERE Category = :search ", search=str(term))
+                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :search ", search=term)
             elif term in dcategory:
-                result = db.execute("SELECT * FROM drinks WHERE Alcoholic = :search ", search=str(term))
-            elif term == "meal":
-                result = db.execute("SELECT * FROM recipes WHERE NOT Category = 'Dessert' AND NOT Categoy = 'Side' AND NOT Category = 'Starter'")
+                result = db.execute("SELECT Category AS '1', Drink AS '2', DrinkThumb AS '3' FROM drinks WHERE Alcoholic = :search ", search=term)
+            elif term == "Meal":
+                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE NOT Category = 'Dessert' AND NOT Category = 'Side' AND NOT Category = 'Starter'")
             else:
-                result = db.execute("SELECT * FROM recipes WHERE Meal LIKE '%:search%'", search=str(term))
+                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Meal = :search", search=term)
         except(KeyError, TypeError, ValueError):
             result = None
 
-        return render_template("search.html" , results=results)
+        return render_template("search.html" , result=result)
 
 @app.route("/login", methods=["POST", "GET"])
 def login():

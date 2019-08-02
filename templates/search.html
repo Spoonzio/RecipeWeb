@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search Result
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        {% for i in range(0, result|length, 3) %}
+            <div class = "row">
+                {% for j in range(i, (i+3), 1)%}
+                    {% if j < (result | length) %}
+                        <div class="col-sm-4">
+                            <img id="{{result[j]['2']}}" src="{{result[j]['3']}}" alt="{{result[j]['2']}}" width = 300 height = 300 a href=" '/search?q=' ~ {{result[j]['2']}} ">
+                            <h6>{{result[j]['2']}}</h6>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="/">Home</a>
+{% endblock %}
