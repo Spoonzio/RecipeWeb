@@ -114,11 +114,13 @@
         {% for i in range(0, result|length, 3) %}
             <div class = "row">
                 <h3 class = "col-sm-12">
-                    <a href="'/search?q=' ~ {{result[i]['1']}}">{{result[i]['1']}}</a>
+                    <a href="{{'/search?q=' ~ result[i]['1']}}">{{result[i]['1']}}</a>
                 </h3>
                 {% for j in range(i, (i+3), 1)%}
                     <div class="col-sm-4">
-                        <img id="{{result[j]['2']}}" src="{{result[j]['3']}}" alt="{{result[j]['2']}}" width = 300 height = 300 a href=" '/search?q=' ~ {{result[j]['2']}} ">
+                        <img id="{{result[j]['2']}}" src="{{result[j]['3']}}" alt="{{result[j]['2']}}" width = 300 height = 300>
+                            <a href="{{'/item?q=' ~ result[j]['2']}}"></a>
+                        </img>
                         <h6>{{result[j]['2']}}</h6>
                     </div>
                     {% endfor %}

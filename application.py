@@ -72,6 +72,23 @@ def search():
 
         return render_template("search.html" , result=result)
 
+@app.route("/item", methods = ["GET", "POST"])
+def item():
+    if request.method == "POST":
+        result = lookup()
+    else:
+        term = str(request.args.get("q")).capitalize()
+        if not term:
+            return redirect("/")
+
+        try:
+            result = db.execute("SELECT * FROM recipes WHERE Meal = :term", term = term)
+        except(KeyError, TypeError, ValueError):
+            return render_template("404.html")
+
+    return render_template("item.html", result = result)
+
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
     session.clear()
@@ -172,7 +189,7 @@ def lookup():
     fterm = request.form.get("search")
     try:
         result = db.execute("SELECT * FROM recipes WHERE name LIKE '%:search%'", search=str(fterm))
-        return (result)
+        return render_template("search.html" , result=fterm)
     except(KeyError, TypeError, ValueError):
         return (None)
 

@@ -5,9 +5,31 @@
 {% endblock %}
 
 {% block main %}
-    <div class="container">
 
-    </div>
+    {% for item in result %}
+        <div class="container">
+            <div class"row">
+                <div class="col-sm-6">
+                    <img src="{{item['MealThumb']}}" alt="item['Meal']">
+                </div>
+
+                <div class="vl"></div>
+
+                <div class = "col-sm-6">
+                    <h2>{{item['Meal']}}</h2>
+                    <h3>Categoy: {{item['Category']}}</h3>
+                    <h3>Country: {{item['Area']}}</h3>
+                    <h4>Instruction: {{item['Instructions']}}</h4>
+                </div>
+            </div>
+        </div>
+        <div class = "container">
+            <iframe width="320" height="240" >
+                <src src="item['MealThumb']">
+            </iframe>
+        </div>
+    {% endfor %}
+
 
     <a href="/">Home</a>
 {% endblock %}
