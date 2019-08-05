@@ -7,27 +7,64 @@
 {% block main %}
 
     {% for item in result %}
-        <div class="container">
-            <div class"row">
-                <div class="col-sm-6">
-                    <img src="{{item['MealThumb']}}" alt="item['Meal']">
+        <div class = "container">
+            <div class = "row">
+                <div class = "col-sm-5">
+                    <img src = "{{item['MealThumb']}}" alt = "{{item['Meal']}}" id = "{{item['Meal']}}" height = 500 width = 500>
                 </div>
 
-                <div class="vl"></div>
+                <div class = "col-sm-2">
+                    <div class = "vl"></div>
+                </div>
 
-                <div class = "col-sm-6">
+                <div class = "col-sm-5">
                     <h2>{{item['Meal']}}</h2>
-                    <h3>Categoy: {{item['Category']}}</h3>
-                    <h3>Country: {{item['Area']}}</h3>
-                    <h4>Instruction: {{item['Instructions']}}</h4>
+                    <h6>Categoy: {{item['Category']}}
+                        <br>Country: {{item['Area']}}
+                    </h6>
+
+                    <iframe width = "525" height = "350" src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
+                    </iframe>
                 </div>
             </div>
         </div>
         <div class = "container">
-            <iframe width="320" height="240" >
-                <src src="item['MealThumb']">
-            </iframe>
+            <div class = row>
+                <div class = "col-sm-5">
+                    <table class="table">
+                        Ingredient
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Measurement</th>
+                        </tr>
+
+                        {% for i in range(20) %}
+                            {% if item['Ingredient' ~ i ]%}
+                            <tr>
+                                <td>{{ item['Ingredient' ~ i ] }}</td>
+                                <td>{{ item['Measure' ~ i ] }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+
+                <div class = "col-sm-2">
+                    <div class = "vl"></div>
+                </div>
+
+                <div class = "col-sm-5">
+                    Instruction
+                </div>
+            </div>
         </div>
+        <script>
+            var ins = {{item['Instruction']}};
+            ins = ins.replace(/. /g, '<br>');
+
+            document.getElementById("instruction").innerHTML = ins;
+        </script>
+
     {% endfor %}
 
 

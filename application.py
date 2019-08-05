@@ -77,7 +77,7 @@ def item():
     if request.method == "POST":
         result = lookup()
     else:
-        term = str(request.args.get("q")).capitalize()
+        term = str(request.args.get("q")).title()
         if not term:
             return redirect("/")
 
