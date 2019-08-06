@@ -78,7 +78,7 @@
             </div>
 
             <div class="carousel-item">
-                <a href="/search?q=Non Alcoholic">
+                <a href="/search?q=Cocoa">
                     <img src="static/non_alcohol.jpg" alt="Non-Alcohol" height = 720 width = 1280>
                     <div class="carousel-caption">
                         <h3 class="h3-responsive">Non-Alcohol Beverages</h3>
@@ -88,7 +88,7 @@
             </div>
 
             <div class="carousel-item">
-                <a href="/search?q=Alcoholic">
+                <a href="/search?q=Cocktail">
                     <img src="static/alcohol.jpg" alt="Alcohol" height = 720 width = 1280>
                     <div class="carousel-caption">
                         <h3 class="h3-responsive">Cocktails</h3>
@@ -118,7 +118,7 @@
                 </h3>
                 {% for j in range(i, (i+3), 1)%}
                     <div class="col-sm-4">
-                            <a href="{{'/item?q=' ~ result[j]['2']}}">
+                            <a href="{{'/food?q=' ~ result[j]['2']}}">
                                 <img id="{{result[j]['2']}}" src="{{result[j]['3']}}" alt="{{result[j]['2']}}" width = 300 height = 300>
                             </a>
                         <h6>{{result[j]['2']}}</h6>

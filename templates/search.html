@@ -6,6 +6,13 @@
 
 {% block main %}
     <div class="container">
+
+        {% if titl %}
+            <h1>
+                {{titl}}
+            </h1>
+        {% endif %}
+
         {% for i in range(0, result|length, 3) %}
             <div class = "row">
                 {% for j in range(i, (i+3), 1)%}

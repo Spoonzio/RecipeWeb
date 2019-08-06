@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Search Result
+    {{result[0]['Meal']}}
 {% endblock %}
 
 {% block main %}
@@ -22,9 +22,10 @@
                     <h6>Categoy: {{item['Category']}}
                         <br>Country: {{item['Area']}}
                     </h6>
-
-                    <iframe width = "525" height = "350" src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
-                    </iframe>
+                    {% if item['Youtube'] != None %}
+                        <iframe width = "525" height = "350" src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
+                        </iframe>
+                    {% endif %}
                 </div>
             </div>
         </div>

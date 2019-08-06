@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{result[0]['Drink']}}
+{% endblock %}
+
+{% block main %}
+
+    {% for item in result %}
+        <div class = "container">
+            <div class = "row">
+                <div class = "col-sm-5">
+                    <img src = "{{item['Thumb']}}" alt = "{{item['Drink']}}" id = "{{item['Drink']}}" height = 500 width = 500>
+                </div>
+
+                <div class = "col-sm-2">
+                    <div class = "vl"></div>
+                </div>
+
+                <div class = "col-sm-5">
+                    <h2>{{item['Drink']}}</h2>
+                    <h6>Categoy: {{item['Category']}}
+                        <br>Serve in: {{item['Glass']}}
+                        <br>{{item['Alcoholic']}}
+                    </h6>
+                </div>
+            </div>
+        </div>
+        <div class = "container">
+            <div class = row>
+                <div class = "col-sm-5">
+                    <table class="table">
+                        <h1>
+                            Ingredient
+                        </h1>
+                        <tr>
+                            <th>Ingredient</th>
+                            <th>Measurement</th>
+                        </tr>
+
+                        {% for i in range(20) %}
+                            {% if item['Ingredient' ~ i ]%}
+                            <tr>
+                                <td>{{ item['Ingredient' ~ i ] }}</td>
+                                <td>{{ item['Measure' ~ i ] }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </div>
+
+                <div class = "col-sm-2">
+                    <div class = "vl"></div>
+                </div>
+
+                <div class = "col-sm-5">
+                    <h1>
+                        Instruction
+                    </h1>
+                </div>
+            </div>
+        </div>
+        <script>
+            var ins = {{item['Instruction']}};
+            ins = ins.replace(/. /g, '<br>');
+
+            document.getElementById("instruction").innerHTML = ins;
+        </script>
+
+    {% endfor %}
+
+
+    <a href="/">Home</a>
+{% endblock %}

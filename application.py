@@ -20,73 +20,96 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+#assign DB
 db = SQL("sqlite:///recipe.db")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        #look up serch term in recipe DB
+        #look up serch term in recipe DB if user use search
         result = lookup()
-        return render_template("search.html" , results=results)
+        return render_template("search.html" , result=result)
 
     else:
         result = []
         display = []
-        fcategory = db.execute("SELECT DISTINCT Category FROM recipes")
-        fcategory = [cat["Category"] for cat in fcategory]
-        random.shuffle(fcategory)
+        cate = db.execute("SELECT DISTINCT Category FROM recipes UNION SELECT DISTINCT Category FROM drinks")
+        cate = [cat["Category"] for cat in cate]
+
+        random.shuffle(cate)
+
         for x in range(3):
-            display.append(str(fcategory[x]))
+            display.append(str(cate[x]))
 
         for i in display:
             temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
+            if not temp:
+                temp = db.execute("SELECT Category AS '1', Drink AS '2', Thumb AS '3' FROM drinks WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
+
             for j in range(len(temp)):
                 result.append(temp[j])
 
+
         return render_template("index.html", result = result)
+
+
 
 @app.route("/search", methods=["POST", "GET"])
 def search():
     if request.method == "POST":
         #look up serch term in recipe DB
         result = lookup()
-        return render_template("search.html" , results=results)
+        return render_template("search.html", result = result)
+
+
     else:
-        term = str(request.args.get("q")).capitalize()
+        term = str(request.args.get("q")).lower()
         if not term:
             return redirect("/")
 
         try:
-            fcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
-            dcategory = [elem['Alcoholic'] for elem in db.execute("SELECT DISTINCT Alcoholic FROM drinks")]
+            fcategory = [elem['Category'].lower() for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
+            dcategory = [elem['Category'].lower() for elem in db.execute("SELECT DISTINCT Category FROM drinks")]
             if term in fcategory:
-                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :search ", search=term)
+                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE LOWER(Category) = :search ", search=term)
             elif term in dcategory:
-                result = db.execute("SELECT Category AS '1', Drink AS '2', DrinkThumb AS '3' FROM drinks WHERE Alcoholic = :search ", search=term)
-            elif term == "Meal":
+                result = db.execute("SELECT Category AS '1', Drink AS '2', Thumb AS '3' FROM drinks WHERE LOWER(Category) = :search ", search=term)
+            elif term == "meal":
                 result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE NOT Category = 'Dessert' AND NOT Category = 'Side' AND NOT Category = 'Starter'")
             else:
-                result = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Meal = :search", search=term)
+                result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) = :search", search=term)
+                return render_template("food.html" , result = result)
+                if not result:
+                    result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :search", search=term)
+                    return render_template("drink.html" , result = result)
         except(KeyError, TypeError, ValueError):
             result = None
 
-        return render_template("search.html" , result=result)
+        return render_template("search.html" , result = result)
 
+
+@app.route("/drink", methods=["POST", "GET"])
+@app.route("/food", methods=["POST", "GET"])
 @app.route("/item", methods = ["GET", "POST"])
 def item():
     if request.method == "POST":
         result = lookup()
+        return render_template("search.html" , result = result)
+
     else:
-        term = str(request.args.get("q")).title()
+        term = str(request.args.get("q")).lower()
         if not term:
             return redirect("/")
 
-        try:
-            result = db.execute("SELECT * FROM recipes WHERE Meal = :term", term = term)
-        except(KeyError, TypeError, ValueError):
-            return render_template("404.html")
+        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) = :term", term = term)
+        if not result :
+            try:
+                result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
+                return render_template("drink.html", result = result)
+            except(KeyError, TypeError, ValueError):
+                return render_template("404.html")
 
-    return render_template("item.html", result = result)
+    return render_template("food.html", result = result)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -186,12 +209,24 @@ def page_not_found(e):
 
 def lookup():
     # lookup db with term
-    fterm = request.form.get("search")
-    try:
-        result = db.execute("SELECT * FROM recipes WHERE name LIKE '%:search%'", search=str(fterm))
-        return render_template("search.html" , result=fterm)
-    except(KeyError, TypeError, ValueError):
-        return (None)
+    search = request.form.get("search").title()
+
+    result =[]
+    temp = []
+    tool = ["%" + str(search), "%" + str(search) + "%", str(search) + "%"]
+    for t in tool:
+        try:
+            temp.append(db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Meal LIKE :s ", s = t))
+            temp.append(db.execute("SELECT Category AS '1', Drink AS '2', Thumb AS '3' FROM drinks WHERE Drink LIKE :s ", s = t))
+        except(KeyError, TypeError, ValueError):
+            pass
+
+    for tlist in temp:
+        for d in tlist:
+            if d not in result:
+                result.append(d)
+
+    return result
 
 if __name__ == '__main__':
     app.run(debug=True)
