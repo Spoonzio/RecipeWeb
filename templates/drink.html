@@ -9,15 +9,11 @@
     {% for item in result %}
         <div class = "container">
             <div class = "row">
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <img src = "{{item['Thumb']}}" alt = "{{item['Drink']}}" id = "{{item['Drink']}}" height = 500 width = 500>
                 </div>
 
-                <div class = "col-sm-2">
-                    <div class = "vl"></div>
-                </div>
-
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <h2>{{item['Drink']}}</h2>
                     <h6>Categoy: {{item['Category']}}
                         <br>Serve in: {{item['Glass']}}
@@ -28,7 +24,7 @@
         </div>
         <div class = "container">
             <div class = row>
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <table class="table">
                         <h1>
                             Ingredient
@@ -49,24 +45,13 @@
                     </table>
                 </div>
 
-                <div class = "col-sm-2">
-                    <div class = "vl"></div>
-                </div>
-
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <h1>
                         Instruction
                     </h1>
                 </div>
             </div>
         </div>
-        <script>
-            var ins = {{item['Instruction']}};
-            ins = ins.replace(/. /g, '<br>');
-
-            document.getElementById("instruction").innerHTML = ins;
-        </script>
-
     {% endfor %}
 
 

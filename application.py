@@ -101,15 +101,15 @@ def item():
         if not term:
             return redirect("/")
 
-        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) = :term", term = term)
+        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
         if not result :
             try:
                 result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
-                return render_template("drink.html", result = result)
+                return render_template("drink.html", result = result, steps = steps)
             except(KeyError, TypeError, ValueError):
                 return render_template("404.html")
 
-    return render_template("food.html", result = result)
+    return render_template("food.html", result = result, steps = steps)
 
 
 @app.route("/login", methods=["POST", "GET"])

@@ -9,21 +9,17 @@
     {% for item in result %}
         <div class = "container">
             <div class = "row">
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <img src = "{{item['MealThumb']}}" alt = "{{item['Meal']}}" id = "{{item['Meal']}}" height = 500 width = 500>
                 </div>
 
-                <div class = "col-sm-2">
-                    <div class = "vl"></div>
-                </div>
-
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <h2>{{item['Meal']}}</h2>
                     <h6>Categoy: {{item['Category']}}
                         <br>Country: {{item['Area']}}
                     </h6>
                     {% if item['Youtube'] != None %}
-                        <iframe width = "525" height = "350" src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
+                        <iframe src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
                         </iframe>
                     {% endif %}
                 </div>
@@ -31,9 +27,9 @@
         </div>
         <div class = "container">
             <div class = row>
-                <div class = "col-sm-5">
+                <div class = "col-sm-6">
                     <table class="table">
-                        Ingredient
+                        <h1>Ingredient</h1>
                         <tr>
                             <th>Ingredient</th>
                             <th>Measurement</th>
@@ -50,21 +46,11 @@
                     </table>
                 </div>
 
-                <div class = "col-sm-2">
-                    <div class = "vl"></div>
-                </div>
-
-                <div class = "col-sm-5">
-                    Instruction
+                <div class = "col-sm-6">
+                    <h1>Instruction</h1>
                 </div>
             </div>
         </div>
-        <script>
-            var ins = {{item['Instruction']}};
-            ins = ins.replace(/. /g, '<br>');
-
-            document.getElementById("instruction").innerHTML = ins;
-        </script>
 
     {% endfor %}
 
