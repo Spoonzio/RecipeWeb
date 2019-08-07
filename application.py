@@ -4,6 +4,7 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 import json
 import random
+import re
 
 from cs50 import SQL
 from helper import login_required
@@ -25,32 +26,27 @@ db = SQL("sqlite:///recipe.db")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == "POST":
-        #look up serch term in recipe DB if user use search
-        result = lookup()
-        return render_template("search.html" , result=result)
 
-    else:
-        result = []
-        display = []
-        cate = db.execute("SELECT DISTINCT Category FROM recipes UNION SELECT DISTINCT Category FROM drinks")
-        cate = [cat["Category"] for cat in cate]
+    result = []
+    display = []
+    cate = db.execute("SELECT DISTINCT Category FROM recipes UNION SELECT DISTINCT Category FROM drinks")
+    cate = [cat["Category"] for cat in cate]
 
-        random.shuffle(cate)
+    random.shuffle(cate)
 
-        for x in range(3):
-            display.append(str(cate[x]))
+    for x in range(3):
+        display.append(str(cate[x]))
 
-        for i in display:
-            temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
-            if not temp:
-                temp = db.execute("SELECT Category AS '1', Drink AS '2', Thumb AS '3' FROM drinks WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
+    for i in display:
+        temp = db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
+        if not temp:
+            temp = db.execute("SELECT Category AS '1', Drink AS '2', Thumb AS '3' FROM drinks WHERE Category = :term ORDER BY RANDOM() LIMIT 3", term=i)
 
-            for j in range(len(temp)):
-                result.append(temp[j])
+        for j in range(len(temp)):
+            result.append(temp[j])
 
 
-        return render_template("index.html", result = result)
+    return render_template("index.html", result = result)
 
 
 
@@ -60,7 +56,6 @@ def search():
         #look up serch term in recipe DB
         result = lookup()
         return render_template("search.html", result = result)
-
 
     else:
         term = str(request.args.get("q")).lower()
@@ -92,23 +87,22 @@ def search():
 @app.route("/food", methods=["POST", "GET"])
 @app.route("/item", methods = ["GET", "POST"])
 def item():
-    if request.method == "POST":
-        result = lookup()
-        return render_template("search.html" , result = result)
+    term = str(request.args.get("q")).lower()
+    #strip
+    if not term:
+        return redirect("/")
 
-    else:
-        term = str(request.args.get("q")).lower()
-        if not term:
-            return redirect("/")
+    result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+    if not result :
+        try:
+            result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
+            steps = step_extract(result)
 
-        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
-        if not result :
-            try:
-                result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
-                return render_template("drink.html", result = result, steps = steps)
-            except(KeyError, TypeError, ValueError):
-                return render_template("404.html")
+            return render_template("drink.html", result = result, steps = steps)
+        except(KeyError, TypeError, ValueError):
+            return render_template("404.html")
 
+    steps = step_extract(result)
     return render_template("food.html", result = result, steps = steps)
 
 
@@ -150,27 +144,29 @@ def register():
         compassword = request.form.get("comfirmation")
 
         if not email:
-            emessage = "missing email"
+            emessage = "Missing Email"
             return render_template("register.html",emessage=emessage)
 
         # Ensure password was submitted
         elif not password:
-            emessage = "missing password"
+            emessage = "Missing Password"
             return render_template("register.html",emessage=emessage)
 
         elif not compassword:
-            emessage = "confirm password"
+            emessage = "Confirm Password"
             return render_template("register.html",emessage=emessage)
 
         # Query database for username
         info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
 
         if len(info) != 0:
-            return apology("user exists already")
+            emessage = "User exists already"
+            return render_template("register.html",emessage=emessage)
+
 
         else:
             if password != compassword:
-                emessage = "must provide matching password"
+                emessage = "Must provide matching password"
                 return render_template("register.html",emessage=emessage)
 
             else:
@@ -189,6 +185,22 @@ def register():
         return render_template("register.html", emessage = None)
 
 
+@app.route("/check", methods=["GET"])
+def check():
+    username = request.args.get("username")
+    info = db.execute("SELECT username FROM users WHERE username = :username", username=username)
+
+    if not info:
+        # if both true which user exists in DB
+       return jsonify(True)
+
+    elif username and (info[0]['username'] == username):
+        # if both true which user exists in DB
+        return jsonify(False)
+
+    else:
+        return jsonify(False)
+
 @app.route("/logout")
 def logout():
     # Log user out
@@ -206,6 +218,13 @@ def page_not_found(e):
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html")
+
+def step_extract(fresult):
+    instruction = str(fresult[0]['Instructions'])
+    steps = instruction.split(". ")
+
+    return steps
+
 
 def lookup():
     # lookup db with term

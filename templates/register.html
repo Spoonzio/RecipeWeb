@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<script>
+    $('document').ready(function(){
+        $('form').on('submit', function(e){
+            e.preventDefault();
+            var email = document.getElementById("email").value;
+            $.get('/check?email=' + email, function(response){
+                if (response == false) {
+                    alert('Email Already Exist');
+                    document.getElementById('register').reset();
+                    $('#email').focus();
+                }
+                else
+                {
+                    (document).getElementById('register').submit();
+                }
+            })
+        })
+    })
+</script>
+
+<form action="/register" method="POST" id='register'>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" id='email' name="email" placeholder="Email" type="text">
+    </div>
+
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" id='name' name="name" placeholder="Name" type="text">
+    </div>
+
+    <div class="form-group">
+        <input class="form-control" name="password" placeholder="Password" type="password">
+    </div>
+    <div class="form-group">
+        <input class="form-control" name="confirmation" placeholder="Password Again" type="password">
+    </div>
+    <button class="btn btn-primary" type="submit">Register</button>
+</form>
+{% endblock %}

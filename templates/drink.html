@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-
+<form action="/food" id = "food"></form>
     {% for item in result %}
         <div class = "container">
             <div class = "row">
@@ -49,6 +49,13 @@
                     <h1>
                         Instruction
                     </h1>
+                    <ol>
+                        {%for step in steps%}
+                                <li>
+                                    <h6 style = "text-align: left">{{step}}.<br></h6>
+                                </li>
+                        {% endfor %}
+                    </ol>
                 </div>
             </div>
         </div>

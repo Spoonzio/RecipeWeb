@@ -1,6 +1,8 @@
 from cs50 import SQL
 import random
 
+import re
+
 db = SQL("sqlite:///recipe.db")
 
 
@@ -26,24 +28,37 @@ db = SQL("sqlite:///recipe.db")
 
 
 
-search =str(input("search term: ")).title()
+# search =str(input("search term: ")).title()
 
-result =[]
-temp = []
-tool = ["%" + str(search), "%" + str(search) + "%", str(search) + "%"]
-for t in tool:
-    try:
-        temp.append(db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Meal LIKE :s ", s = t))
-    except(KeyError, TypeError, ValueError):
-        pass
+# result =[]
+# temp = []
+# tool = ["%" + str(search), "%" + str(search) + "%", str(search) + "%"]
+# for t in tool:
+#     try:
+#         temp.append(db.execute("SELECT Category AS '1', Meal AS '2', MealThumb AS '3' FROM recipes WHERE Meal LIKE :s ", s = t))
+#     except(KeyError, TypeError, ValueError):
+#         pass
 
-for tlist in temp:
-    for d in tlist:
-        if d not in result:
-            result.append(d)
+# for tlist in temp:
+#     for d in tlist:
+#         if d not in result:
+#             result.append(d)
 
-print(str(result))
-
-
+# print(str(result))
 
 
+
+def step_extract(fresult):
+    instruction = str(fresult[0]['Instructions'])
+    steps = instruction.split(".")
+
+    return steps
+
+
+
+term = str(input("search term: ")).lower()
+#strip
+
+result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+steps = step_extract(result)
+print(str(steps))
