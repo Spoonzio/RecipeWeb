@@ -5,6 +5,12 @@ Server Error
 {% endblock %}
 
 {% block main %}
-<h1>Server error, bleep boop beep.</h1>
-<a href="/">Home</a>
+
+<form action="/500" id = '500'>
+    <h1>Server error, bleep boop beep.</h1>
+
+    <img src="static/404.png" alt = "404">
+
+    <a href="/">Home</a>
+</form>
 {% endblock %}

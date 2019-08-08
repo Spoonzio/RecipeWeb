@@ -5,8 +5,10 @@
 {% endblock %}
 
 {% block main %}
-    <div class="container">
 
+<form action="/search" id = "search">
+
+    <div class="container">
         {% if titl %}
             <h1>
                 {{titl}}
@@ -30,4 +32,5 @@
     </div>
 
     <a href="/">Home</a>
+</form>
 {% endblock %}

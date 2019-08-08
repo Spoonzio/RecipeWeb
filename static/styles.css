@@ -8,6 +8,16 @@
     margin-right: 100px;
 }
 
+nav-link{
+    border-style: solid;
+    border-color: navy;
+    border-width: 3px;
+}
+
+button{
+    margin: 10px;
+}
+
 img {
     max-width: 100%;
     height: auto;

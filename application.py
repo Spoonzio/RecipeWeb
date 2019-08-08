@@ -87,26 +87,61 @@ def search():
 @app.route("/food", methods=["POST", "GET"])
 @app.route("/item", methods = ["GET", "POST"])
 def item():
-    term = str(request.args.get("q")).lower()
-    #strip
-    if not term:
+    if request.method == "POST":
+        if 'user_id' in session:
+            temp = checksaved()
+
+            if isinstance(temp, list):
+                db.execute("INSERT INTO saved(id, user, recipe, food) VALUES (NULL, :user, :re, :food)", user = session["user_id"], re = temp[0], food = temp[1])
+                flash("Recipe is saved", "success")
+
+            elif temp == None:
+                flash("Recipe is already saved", "info")
+
+            elif temp == False:
+                return render_template("500.html"), 500
+
+        else:
+            return redirect("/login")
+
+    else:
+        term = str(request.args.get("q")).lower()
+
+        if not term:
+            return redirect("/")
+
+        if 'user_id' in session:
+            butt = "Save To Your Account"
+            butdisable = "enabled"
+
+        else:
+            butt = "You Must Be Logged In To Save Recipes"
+            butdisable = "disabled"
+
+        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+        if not result :
+            try:
+                result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
+                steps = step_extract(result)
+
+                return render_template("drink.html", result = result, steps = steps, butt = butt, disabled = butdisable)
+            except(KeyError, TypeError, ValueError):
+                return render_template("404.html"), 404
+
+        steps = step_extract(result)
+        return render_template("food.html", result = result, steps = steps, butt = butt, disabled = butdisable)
+
+@app.route("/saved")
+@login_required
+def saved():
+    if 'user_id' not in session:
         return redirect("/")
-
-    result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
-    if not result :
-        try:
-            result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
-            steps = step_extract(result)
-
-            return render_template("drink.html", result = result, steps = steps)
-        except(KeyError, TypeError, ValueError):
-            return render_template("404.html")
-
-    steps = step_extract(result)
-    return render_template("food.html", result = result, steps = steps)
+    else:
+        #look up saved recipe
+        return render_template("saved.html")
 
 
-@app.route("/login", methods=["POST", "GET"])
+@app.route("/login", methods = ["GET", "POST"])
 def login():
     session.clear()
 
@@ -115,67 +150,66 @@ def login():
         password = request.form.get("password")
 
         if not email:
-            return #error message
+            flash("Missing Email", "danger")
+            return render_template("login.html"),400
         elif not password:
-            emessage = "missing password"
-            return render_template("login.html", emessage=emessage)
+            flash("Missing Password", "danger")
+            return render_template("login.html"),400
 
         info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
         if len(info) != 1 or not check_password_hash(info[0]["hash"], password):
-            emessage = "invalid email or password"
-            return render_template("login.html", emessage=emessage)
+            flash("Invalid Email Or Password", "danger")
+            return render_template("login.html"),400
         else:
-            session["user_id"] = rows[0]["id"]
+            session["user_id"] = info[0]["id"]
             return redirect("/")
 
     else:
-        return render_template("login.html", emessage = None)
+        return render_template("login.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["POST", "GET"])
 def register():
     # Register user
-
     if request.method == "POST":
         # Ensure username was submitted
         email = request.form.get("email")
         name = request.form.get("name")
         password = request.form.get("password")
-        compassword = request.form.get("comfirmation")
+        compassword = request.form.get("confirmation")
 
         if not email:
-            emessage = "Missing Email"
-            return render_template("register.html",emessage=emessage)
+            flash("Missing Email", 'danger')
+            return render_template("register.html")
 
         # Ensure password was submitted
         elif not password:
-            emessage = "Missing Password"
-            return render_template("register.html",emessage=emessage)
+            flash("Missing Password", 'danger')
+            return render_template("register.html")
 
         elif not compassword:
-            emessage = "Confirm Password"
-            return render_template("register.html",emessage=emessage)
+            flash("Please Confirm Password", 'danger')
+            return render_template("register.html")
 
         # Query database for username
         info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
 
         if len(info) != 0:
-            emessage = "User exists already"
-            return render_template("register.html",emessage=emessage)
-
+            flash("User Already Exists", 'danger')
+            return render_template("register.html")
 
         else:
             if password != compassword:
-                emessage = "Must provide matching password"
-                return render_template("register.html",emessage=emessage)
+                flash("Must Provide Matching Password", 'danger')
+                return render_template("register.html")
 
             else:
                 hashpw = generate_password_hash(password)
-                db.execute("INSERT INTO user ('id','email','hash') VALUES (NULL, :ue, :pw)", ue=email, pw=hashpw)
+                db.execute("INSERT INTO user ('id','name','email','hash') VALUES (NULL,:un, :ue, :pw)",un=name, ue=email, pw=hashpw)
 
             # Remember which user has logged in
-            rows = db.execute("SELECT * FROM user WHERE email = :email", email=email)
-            session["user_id"] = rows[0]["id"]
+            info = db.execute("SELECT * FROM user WHERE email = :email", email=email)
+            session["user_id"] = info[0]["id"]
 
             # Redirect user to home page
             return redirect("/")
@@ -187,14 +221,14 @@ def register():
 
 @app.route("/check", methods=["GET"])
 def check():
-    username = request.args.get("username")
-    info = db.execute("SELECT username FROM users WHERE username = :username", username=username)
+    email = request.args.get("email")
+    info = db.execute("SELECT email FROM user WHERE email = :email", email = email)
 
     if not info:
         # if both true which user exists in DB
        return jsonify(True)
 
-    elif username and (info[0]['username'] == username):
+    elif email and (info[0]['email'] == email):
         # if both true which user exists in DB
         return jsonify(False)
 
@@ -202,6 +236,7 @@ def check():
         return jsonify(False)
 
 @app.route("/logout")
+@login_required
 def logout():
     # Log user out
     # Forget any user_id
@@ -213,17 +248,38 @@ def logout():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template("404.html")
+    return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def page_not_found(e):
-    return render_template("500.html")
+    return render_template("500.html"), 500
 
 def step_extract(fresult):
     instruction = str(fresult[0]['Instructions'])
     steps = instruction.split(". ")
 
     return steps
+
+
+def checksaved():
+    term = str(request.args.get("q")).lower()
+
+    re_id = [elem['DrinkID'] for elem in db.execute("SELECT idMeal FROM recipes WHERE LOWER(Meal) = :search", search=term)]
+    food = True
+
+    if not re_id:
+        re_id = [elem['DrinkID'] for elem in db.execute("SELECT DrinkID FROM drinks WHERE LOWER(Drink) = :search", search=term)]
+        food = False
+
+        if not re_id:
+            return(False)
+
+    exist = db.execute("SELECT * FROM saved WHERE recipe = :re AND user = :user", user = session["user_id"], re = re_id)
+
+    if exist == None:
+        return([re_id, food])
+    else:
+        return(None)
 
 
 def lookup():

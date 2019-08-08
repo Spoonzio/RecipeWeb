@@ -25,21 +25,28 @@
     })
 </script>
 
-<form action="/register" method="POST" id='register'>
-    <div class="form-group">
-        <input autocomplete="off" autofocus class="form-control" id='email' name="email" placeholder="Email" type="text">
+<form action="/register" method="POST" id='register' class = "register-form">
+    <h1>RecipeWeb</h1>
+    <h5>Register For An Account To Save Your Favourite Recipes</h5>
+
+    <div class = "container-form" style = "padding: 30px 50px; background-color: #EEE;">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" id='email' name="email" placeholder="Email" type="text">
+        </div>
+
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" id='name' name="name" placeholder="Name" type="text">
+        </div>
+
+        <div class="form-group">
+            <input class="form-control" name="password" placeholder="Password" type="password">
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="confirmation" placeholder="Password Again" type="password">
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+
     </div>
 
-    <div class="form-group">
-        <input autocomplete="off" autofocus class="form-control" id='name' name="name" placeholder="Name" type="text">
-    </div>
-
-    <div class="form-group">
-        <input class="form-control" name="password" placeholder="Password" type="password">
-    </div>
-    <div class="form-group">
-        <input class="form-control" name="confirmation" placeholder="Password Again" type="password">
-    </div>
-    <button class="btn btn-primary" type="submit">Register</button>
 </form>
 {% endblock %}

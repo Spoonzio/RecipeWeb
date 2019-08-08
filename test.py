@@ -4,8 +4,9 @@ import random
 import re
 
 db = SQL("sqlite:///recipe.db")
-
-
+term = "Mojito".lower()
+result = db.execute("SELECT DrinkID FROM drinks WHERE LOWER(Drink) = :search", search=term)
+print(str(result))
 
 # fcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
 # dcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM drinks")]
