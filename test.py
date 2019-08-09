@@ -4,9 +4,8 @@ import random
 import re
 
 db = SQL("sqlite:///recipe.db")
-term = "Mojito".lower()
-result = db.execute("SELECT DrinkID FROM drinks WHERE LOWER(Drink) = :search", search=term)
-print(str(result))
+
+# print(str(db.execute("SELECT DrinkID AS '1' FROM drinks WHERE Drink = 'Mojito'")))
 
 # fcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
 # dcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM drinks")]
@@ -49,17 +48,65 @@ print(str(result))
 
 
 
-def step_extract(fresult):
-    instruction = str(fresult[0]['Instructions'])
-    steps = instruction.split(".")
+# def step_extract(fresult):
+#     instruction = str(fresult[0]['Instructions'])
+#     steps = instruction.split(".")
 
-    return steps
+#     return steps
 
 
 
-term = str(input("search term: ")).lower()
-#strip
+# term = str(input("search term: ")).lower()
+# #strip
 
-result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
-steps = step_extract(result)
-print(str(steps))
+# result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+# steps = step_extract(result)
+# print(str(steps))
+
+records = db.execute("SELECT * FROM saved WHERE user = '1' ")
+table = []
+print(str(records))
+
+for record in records:
+    temp = {}
+    if record['food'] == True:
+        meal = db.execute("SELECT Meal AS '1', Category AS '2'  FROM recipes WHERE idMeal = :mealid", mealid = record['recipe'])
+        temp = meal[0]
+        temp['3'] = "Food"
+    else:
+        drink = db.execute("SELECT Drink AS '1', Category AS '2'  FROM drinks WHERE DrinkID = :drinkid", drinkid = record['recipe'])
+        temp = drink[0]
+        temp['3'] = "Drink"
+
+    table.append(temp)
+
+print(str(table))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

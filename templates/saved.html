@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Saved Recipes
+{% endblock %}
+
+{% block main %}
+
+    <header class = "recipe-title">
+        <h2 name = "retitle" >Saved Recipes</h2>
+        <h6>All Saved Recipes Goes Here</h6>
+    </header>
+
+    {% if not table%}
+        <h4>No Recipe Found, Go To Recipe's Pages And Click "Save To Profile"</h4>
+
+    {% else %}
+
+        <table class="table table-hover">
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+            {% for row in table %}
+                <form action="/saved?q={{row['0']}}" method = 'POST'>
+                    <tr>
+                        {% for x in range(1,4,1) %}
+                            <td>
+                                {{ row[ x|string ] }}
+                            </td>
+                        {% endfor %}
+
+                        <td>
+                            <button class="btn btn-danger" type="submit">Delete</button>
+                        </td>
+                    </tr>
+                </form>
+
+            {% endfor%}
+
+        </table>
+    {% endif %}
+
+    <a href="/">Home</a>
+{% endblock %}

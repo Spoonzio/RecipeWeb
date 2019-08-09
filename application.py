@@ -85,7 +85,6 @@ def search():
 
 @app.route("/save", methods=["POST", "GET"])
 def saveto():
-
     if request.method == "POST":
         if 'user_id' in session:
             food = str(request.args.get("q")).lower()
@@ -105,8 +104,6 @@ def saveto():
 
         else:
             return redirect("/login")
-
-
 
 
 @app.route("/drink", methods=["POST", "GET"])
@@ -140,14 +137,42 @@ def item():
     steps = step_extract(result)
     return render_template("food.html", result = result, steps = steps, butt = butt, disabled = butdisable)
 
-@app.route("/saved")
+
+@app.route("/saved", methods = ["GET", "POST"])
 @login_required
 def saved():
-    if 'user_id' not in session:
-        return redirect("/")
+
+    if request.method == 'POST':
+
+        selected = str(request.args.get("q"))
+        db.execute("DELETE FROM 'saved' WHERE recipe = :sel AND user = :us", us = session['user_id'], sel = selected)
+
+        flash("Successfully deleted from your profile", "success")
+        return redirect("/saved")
+
     else:
-        #look up saved recipe
-        return render_template("saved.html")
+
+        if 'user_id' not in session:
+            return redirect("/login")
+        else:
+            #look up saved recipe
+            records = db.execute("SELECT * FROM saved WHERE user = :iden", iden = session["user_id"])
+            table = []
+
+            for record in records:
+                temp = {}
+                if record['food'] == True:
+                    meal = db.execute("SELECT idMeal AS '0', Meal AS '1', Category AS '2'  FROM recipes WHERE idMeal = :mealid", mealid = record['recipe'])
+                    temp = meal[0]
+                    temp['3'] = "Food"
+                else:
+                    drink = db.execute("SELECT DrinkID AS '0', Drink AS '1', Category AS '2'  FROM drinks WHERE DrinkID = :drinkid", drinkid = record['recipe'])
+                    temp = drink[0]
+                    temp['3'] = "Drink"
+
+                table.append(temp)
+
+            return render_template("saved.html", table = table)
 
 
 @app.route("/login", methods = ["GET", "POST"])
@@ -171,6 +196,7 @@ def login():
             return render_template("login.html"),400
         else:
             session["user_id"] = info[0]["id"]
+            flash("Logged In Successfully", "success")
             return redirect("/")
 
     else:
