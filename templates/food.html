@@ -5,24 +5,30 @@
 {% endblock %}
 
 {% block main %}
-<form action="/food" id = "food" method = 'POST'>
+
     {% for item in result %}
+    <form action="/save?q={{item['Meal']}}" id = "food" method = 'POST'>
         <div class = "container">
+
+            <header class = "recipe-title">
+                <h2 name = "retitle">{{item['Meal']}}</h2>
+                <h6>Categoy: {{item['Category']}}
+                    <br>Country: {{item['Area']}}
+                </h6>
+            </header>
+
             <div class = "row">
                 <div class = "col-sm-6">
                     <img src = "{{item['MealThumb']}}" alt = "{{item['Meal']}}" id = "{{item['Meal']}}" height = 500 width = 500>
                 </div>
 
                 <div class = "col-sm-6">
-                    <h2>{{item['Meal']}}</h2>
-                    <h6>Categoy: {{item['Category']}}
-                        <br>Country: {{item['Area']}}
-                    </h6>
                     {% if item['Youtube'] != None %}
                         <iframe src = "https://www.youtube.com/embed/{{item['Youtube'][32:]}}">
                         </iframe>
                     {% endif %}
                 </div>
+
             </div>
         </div>
 
@@ -61,8 +67,9 @@
                 </div>
             </div>
         </div>
+        </form>
     {% endfor %}
 
     <a href="/">Home</a>
-</form>
+
 {% endblock %}

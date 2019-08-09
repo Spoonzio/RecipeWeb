@@ -83,20 +83,22 @@ def search():
         return render_template("search.html" , result = result)
 
 
-@app.route("/drink", methods=["POST", "GET"])
-@app.route("/food", methods=["POST", "GET"])
-@app.route("/item", methods = ["GET", "POST"])
-def item():
+@app.route("/save", methods=["POST", "GET"])
+def saveto():
+
     if request.method == "POST":
         if 'user_id' in session:
-            temp = checksaved()
+            food = str(request.args.get("q")).lower()
+            temp = checksaved(food)
 
             if isinstance(temp, list):
                 db.execute("INSERT INTO saved(id, user, recipe, food) VALUES (NULL, :user, :re, :food)", user = session["user_id"], re = temp[0], food = temp[1])
                 flash("Recipe is saved", "success")
+                return redirect("/item?q=" + str(food))
 
             elif temp == None:
                 flash("Recipe is already saved", "info")
+                return redirect("/item?q=" + str(food))
 
             elif temp == False:
                 return render_template("500.html"), 500
@@ -104,32 +106,39 @@ def item():
         else:
             return redirect("/login")
 
+
+
+
+@app.route("/drink", methods=["POST", "GET"])
+@app.route("/food", methods=["POST", "GET"])
+@app.route("/item", methods = ["GET", "POST"])
+def item():
+
+    term = str(request.args.get("q")).lower()
+
+    if not term:
+        return redirect("/")
+
+    if 'user_id' in session:
+        butt = "Save To Your Account"
+        butdisable = "enabled"
+
     else:
-        term = str(request.args.get("q")).lower()
+        butt = "You Must Be Logged In To Save Recipes"
+        butdisable = "disabled"
 
-        if not term:
-            return redirect("/")
+    result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+    if not result :
+        try:
+            result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
+            steps = step_extract(result)
 
-        if 'user_id' in session:
-            butt = "Save To Your Account"
-            butdisable = "enabled"
+            return render_template("drink.html", result = result, steps = steps, butt = butt, disabled = butdisable)
+        except(KeyError, TypeError, ValueError):
+            return render_template("404.html"), 404
 
-        else:
-            butt = "You Must Be Logged In To Save Recipes"
-            butdisable = "disabled"
-
-        result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
-        if not result :
-            try:
-                result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
-                steps = step_extract(result)
-
-                return render_template("drink.html", result = result, steps = steps, butt = butt, disabled = butdisable)
-            except(KeyError, TypeError, ValueError):
-                return render_template("404.html"), 404
-
-        steps = step_extract(result)
-        return render_template("food.html", result = result, steps = steps, butt = butt, disabled = butdisable)
+    steps = step_extract(result)
+    return render_template("food.html", result = result, steps = steps, butt = butt, disabled = butdisable)
 
 @app.route("/saved")
 @login_required
@@ -261,14 +270,13 @@ def step_extract(fresult):
     return steps
 
 
-def checksaved():
-    term = str(request.args.get("q")).lower()
+def checksaved(reci):
 
-    re_id = [elem['DrinkID'] for elem in db.execute("SELECT idMeal FROM recipes WHERE LOWER(Meal) = :search", search=term)]
+    re_id = [elem['idMeal'] for elem in db.execute("SELECT idMeal FROM recipes WHERE LOWER(Meal) = :search", search=reci)]
     food = True
 
     if not re_id:
-        re_id = [elem['DrinkID'] for elem in db.execute("SELECT DrinkID FROM drinks WHERE LOWER(Drink) = :search", search=term)]
+        re_id = [elem['DrinkID'] for elem in db.execute("SELECT DrinkID FROM drinks WHERE LOWER(Drink) = :search", search=reci)]
         food = False
 
         if not re_id:
@@ -276,7 +284,7 @@ def checksaved():
 
     exist = db.execute("SELECT * FROM saved WHERE recipe = :re AND user = :user", user = session["user_id"], re = re_id)
 
-    if exist == None:
+    if not exist:
         return([re_id, food])
     else:
         return(None)
