@@ -5,7 +5,8 @@ import re
 
 db = SQL("sqlite:///recipe.db")
 
-# print(str(db.execute("SELECT DrinkID AS '1' FROM drinks WHERE Drink = 'Mojito'")))
+
+print(str(db.execute("SELECT DrinkID AS '1' FROM drinks WHERE Drink = 'YOYO'")))
 
 # fcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM recipes")]
 # dcategory = [elem['Category'] for elem in db.execute("SELECT DISTINCT Category FROM drinks")]
@@ -63,24 +64,24 @@ db = SQL("sqlite:///recipe.db")
 # steps = step_extract(result)
 # print(str(steps))
 
-records = db.execute("SELECT * FROM saved WHERE user = '1' ")
-table = []
-print(str(records))
+# records = db.execute("SELECT * FROM saved WHERE user = '1' ")
+# table = []
+# print(str(records))
 
-for record in records:
-    temp = {}
-    if record['food'] == True:
-        meal = db.execute("SELECT Meal AS '1', Category AS '2'  FROM recipes WHERE idMeal = :mealid", mealid = record['recipe'])
-        temp = meal[0]
-        temp['3'] = "Food"
-    else:
-        drink = db.execute("SELECT Drink AS '1', Category AS '2'  FROM drinks WHERE DrinkID = :drinkid", drinkid = record['recipe'])
-        temp = drink[0]
-        temp['3'] = "Drink"
+# for record in records:
+#     temp = {}
+#     if record['food'] == True:
+#         meal = db.execute("SELECT Meal AS '1', Category AS '2'  FROM recipes WHERE idMeal = :mealid", mealid = record['recipe'])
+#         temp = meal[0]
+#         temp['3'] = "Food"
+#     else:
+#         drink = db.execute("SELECT Drink AS '1', Category AS '2'  FROM drinks WHERE DrinkID = :drinkid", drinkid = record['recipe'])
+#         temp = drink[0]
+#         temp['3'] = "Drink"
 
-    table.append(temp)
+#     table.append(temp)
 
-print(str(table))
+# print(str(table))
 
 
 

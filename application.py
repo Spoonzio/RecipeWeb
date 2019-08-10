@@ -174,6 +174,52 @@ def saved():
 
             return render_template("saved.html", table = table)
 
+@app.route("/profile", methods =["GET", "POST"])
+@login_required
+def profile():
+    if request.method == 'POST':
+
+        email = request.form.get("emailprofile")
+        name =  request.form.get("nameprofile")
+        newpass = request.form.get("newpass")
+        newpassre = request.form.get("newpassre")
+        userfield = db.execute("SELECT * FROM user WHERE id = :iden", iden = session['user_id'])
+
+        if not name and not newpass and not email:
+            flash("No new info has been entered nor changed.", "info")
+            return redirect("/profile")
+
+        if email:
+            checkemail = db.execute("SELECT id FROM user WHERE email = :em", em = email)
+            if not checkemail or (email == userfield[0]['email']):
+                userfield[0]['email'] = email
+            else:
+                flash("Email is already registered, please use another one.", "warning")
+                return redirect("/profile")
+
+
+
+
+        if newpass:
+            if newpass != newpassre:
+                flash("Passwords do not match. Please re-enter to confirm.", "warning")
+                return redirect("/profile")
+            else:
+                userfield[0]['hash'] = generate_password_hash(newpass)
+
+        if name:
+            userfield[0]['name'] = name
+
+        for user in userfield:
+            db.execute("UPDATE user SET name = :name , email = :email, hash = :hashpw", name = user["name"], email = user["email"], hashpw = user["hash"])
+
+        flash("Successfully updated your profile information", "success")
+        return redirect("/profile")
+    else:
+
+        info = db.execute("SELECT * FROM user WHERE id = :iden", iden = session["user_id"])
+        return render_template("profile.html", info = info[0])
+
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():

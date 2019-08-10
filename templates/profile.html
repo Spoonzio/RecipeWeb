@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Profile
+{% endblock %}
+
+{% block main %}
+<form action="/profile" method="POST" id='profile' >
+    <h1>RecipeWeb</h1>
+    <h5>Only Edit The Info You Wish to Change</h5>
+
+    <div class = "container-form" style = "padding: 30px 50px; background-color: #EEE;">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" id='emailprofile' name="emailprofile" placeholder="{{info['email']}}" type="text">
+        </div>
+
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" id='nameprofile' name="nameprofile" placeholder="{{info['name']}}" type="text">
+        </div>
+
+        <h6>If You Wish To Change Your Password, Please Your New Password In The Below 2 Boxes</h6>
+        <div class="form-group">
+            <input class="form-control" name="newpass" placeholder="Password" type="password">
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="newpassre" placeholder="Password Again" type="password">
+        </div>
+        <button class="btn btn-primary" type="submit">Edit</button>
+    </div>
+
+</form>
+    <a href="/">Home</a>
+{% endblock %}
