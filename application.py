@@ -124,7 +124,7 @@ def item():
         butt = "You Must Be Logged In To Save Recipes"
         butdisable = "disabled"
 
-    result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) =  :term ", term = term)
+    result = db.execute("SELECT * FROM recipes WHERE LOWER(Meal) = :term ", term = term)
     if not result :
         try:
             result = db.execute("SELECT * FROM drinks WHERE LOWER(Drink) = :term", term = term)
@@ -196,9 +196,6 @@ def profile():
             else:
                 flash("Email is already registered, please use another one.", "warning")
                 return redirect("/profile")
-
-
-
 
         if newpass:
             if newpass != newpassre:
@@ -307,7 +304,7 @@ def check():
 
     if not info:
         # if both true which user exists in DB
-       return jsonify(True)
+        return jsonify(True)
 
     elif email and (info[0]['email'] == email):
         # if both true which user exists in DB
@@ -315,6 +312,7 @@ def check():
 
     else:
         return jsonify(False)
+
 
 @app.route("/logout")
 @login_required
@@ -324,6 +322,7 @@ def logout():
     session.clear()
 
     #  Redirect user to login form
+    flash("Logged out successfully", "success")
     return redirect("/")
 
 
@@ -331,15 +330,17 @@ def logout():
 def page_not_found(e):
     return render_template("404.html"), 404
 
+
 @app.errorhandler(500)
 def page_not_found(e):
     return render_template("500.html"), 500
+
 
 def step_extract(fresult):
     instruction = str(fresult[0]['Instructions'])
     steps = instruction.split(". ")
 
-    return steps
+    return (steps)
 
 
 def checksaved(reci):

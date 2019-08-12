@@ -33,7 +33,11 @@
                         {% endfor %}
 
                         <td>
+                            <a href="{{'/item?q=' ~ row['1'] }}" class="btn btn-info">
+                                <span>View</span>
+                            </a>
                             <button class="btn btn-danger" type="submit">Delete</button>
+
                         </td>
                     </tr>
                 </form>
