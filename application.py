@@ -23,7 +23,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Assign DB
-db = SQL("sqlite:///recipe.db")
+db = SQL("postgres://beeskfypfiaceo:ca304dffa1d4fedccd4f9258d17e645579acaa99e49d5498996a30bd56165e28@ec2-54-86-170-8.compute-1.amazonaws.com:5432/de49m997tpkl52")
 
 
 @app.route("/", methods=["GET", "POST"])
